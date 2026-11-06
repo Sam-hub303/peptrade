@@ -253,10 +253,19 @@
     try { localStorage.setItem(k, v); } catch (x) {}
     location.reload();
   }, true);
+  // React v angličtině hlavičku překreslí a prvky vytvoří znovu, proto se pořadí a označení obnovují.
+  function syncHeader(h) {
+    var mb = h.querySelector('[data-menu-btn]'), wrap = h.querySelector('[data-tools]'), nav = h.querySelector('nav'); if (!mb || !wrap) return;
+    var kids = Array.prototype.filter.call(h.children, function (e) { return e !== mb && e !== wrap; }), cart = kids[kids.length - 1];
+    if (cart && !cart.hasAttribute('data-cart-btn')) cart.setAttribute('data-cart-btn', '');
+    if (nav && nav.style.marginLeft !== 'auto') { nav.style.marginLeft = 'auto'; nav.style.marginRight = 'auto'; }
+    if (cart && wrap.nextElementSibling !== cart) h.insertBefore(wrap, cart);
+    if (h.lastElementChild !== mb) h.appendChild(mb);
+  }
   function start() {
     document.documentElement.lang = lang;
     topbar();
-    var ensure = function () { var h = document.querySelector('header'); if (h && !document.querySelector('x-dc') && h.textContent.indexOf('{{') < 0) toggle(); };
+    var ensure = function () { var h = document.querySelector('header'); if (h && !document.querySelector('x-dc') && h.textContent.indexOf('{{') < 0) { toggle(); syncHeader(h); } };
     ensure();
     new MutationObserver(ensure).observe(document.documentElement, { childList: true, subtree: true });
     if (lang !== 'en' && cur !== 'eur') return;
