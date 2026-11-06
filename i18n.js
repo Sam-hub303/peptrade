@@ -91,6 +91,7 @@
     [/^(\d+)% · NAČÍTÁNÍ$/, '$1% · LOADING'],
     [/^OBJEDNÁVKA (.+)$/, 'ORDER $1'],
     [/^Přidat za (.+)$/, 'Add for $1'],
+    [/^K rozpuštění lyofilizátu · (.+)$/, 'For reconstitution · $1'],
     [/^Přidejte (\d+) ks a ušetříte (.+)$/, 'Add $1 more and save $2']
   ];
   var CKEY = 'peptrade-cur', RATE = 25, cur = 'czk';
@@ -154,9 +155,53 @@
     cbox.setAttribute('data-cur-toggle', '');
     var cart = h.lastElementChild;
     var wrap = document.createElement('div');
-    wrap.style.cssText = 'display:flex;align-items:center;gap:12px;margin-right:-12px';
+    wrap.style.cssText = 'display:flex;align-items:center;gap:12px;margin-right:-12px'; wrap.setAttribute('data-tools', '');
     var nav = h.querySelector('nav'); if (nav) { nav.style.marginLeft = 'auto'; nav.style.marginRight = 'auto'; }
     h.insertBefore(wrap, cart); wrap.appendChild(cbox); wrap.appendChild(box);
+    cart.setAttribute('data-cart-btn', '');
+    var mb = document.createElement('button');
+    mb.setAttribute('data-menu-btn', ''); mb.setAttribute('aria-label', 'Menu');
+    mb.style.cssText = 'display:none;flex:none;width:44px;height:44px;border-radius:999px;border:1px solid #2c3036;background:#121417;cursor:pointer;align-items:center;justify-content:center;padding:0';
+    mb.innerHTML = '<svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="#ece8e1" stroke-width="1.5"><path d="M0 3h18M0 9h18"/></svg>';
+    mb.onclick = function () { openMenu(h); };
+    h.appendChild(mb);
+  }
+  function openMenu(h) {
+    var en = lang === 'en';
+    var ov = document.createElement('div');
+    ov.style.cssText = "position:fixed;inset:0;z-index:250;background:#07080a;display:flex;flex-direction:column;padding:34px 20px 28px;font-family:Lexend,sans-serif;overflow-y:auto";
+    var top = document.createElement('div');
+    top.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:12px 0';
+    var logo = h.querySelector('[data-m=logo]'); if (logo) { var l = logo.cloneNode(); l.style.height = '22px'; top.appendChild(l); }
+    var x = document.createElement('button'); x.setAttribute('aria-label', 'Zavřít');
+    x.style.cssText = 'width:44px;height:44px;border-radius:999px;border:1px solid #2c3036;background:#121417;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0';
+    x.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" stroke="#ece8e1" stroke-width="1.5"><path d="M1 1l12 12M13 1L1 13"/></svg>';
+    x.onclick = function () { ov.remove(); document.documentElement.style.overflow = ''; };
+    top.appendChild(x); ov.appendChild(top);
+    var list = document.createElement('nav'); list.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:40px';
+    var here = location.pathname.split('/').pop();
+    (h.querySelectorAll('[data-m=nav] a') || []).forEach(function (a) {
+      var n = document.createElement('a'); n.href = a.getAttribute('href'); n.textContent = a.textContent;
+      var on = here && decodeURIComponent(a.getAttribute('href')).indexOf(decodeURIComponent(here)) === 0 && a.getAttribute('href').indexOf('#') < 0;
+      n.style.cssText = 'display:flex;justify-content:space-between;align-items:center;font-size:44px;font-weight:300;line-height:1.25;letter-spacing:-0.02em;color:' + (on ? '#9fe3c4' : '#ece8e1') + ';text-decoration:none';
+      n.onclick = function () { ov.remove(); document.documentElement.style.overflow = ''; };
+      list.appendChild(n);
+    });
+    ov.appendChild(list);
+    var bottom = document.createElement('div'); bottom.style.cssText = 'margin-top:auto;padding-top:24px;border-top:1px solid #1d2024;display:flex;flex-direction:column;gap:22px';
+    var row = document.createElement('div'); row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:12px';
+    function seg(opts, curv, key) {
+      var s = document.createElement('div'); s.style.cssText = "display:grid;grid-template-columns:1fr 1fr;padding:5px;border:1px solid #2c3036;border-radius:999px;font:500 13px 'IBM Plex Mono',monospace;letter-spacing:.12em";
+      opts.forEach(function (o) { var b = document.createElement('button'); b.textContent = o[1]; var on = o[0] === curv;
+        b.style.cssText = 'height:44px;border:0;border-radius:999px;cursor:pointer;font:inherit;letter-spacing:inherit;background:' + (on ? '#1b2a24' : 'transparent') + ';color:' + (on ? '#9fe3c4' : '#6d7076');
+        b.onclick = function () { if (on) return; try { localStorage.setItem(key, o[0]); } catch (e) {} location.reload(); }; s.appendChild(b); });
+      return s;
+    }
+    row.appendChild(seg([['cs', 'CS'], ['en', 'EN']], lang, KEY)); row.appendChild(seg([['czk', 'CZK'], ['eur', 'EUR']], cur, CKEY));
+    bottom.appendChild(row);
+    var mail = document.createElement('a'); mail.href = 'mailto:info@peptrade.cz'; mail.textContent = 'info@peptrade.cz'; mail.style.cssText = 'font-size:17px;color:#a9a6a0;text-decoration:none';
+    bottom.appendChild(mail); ov.appendChild(bottom);
+    document.body.appendChild(ov); document.documentElement.style.overflow = 'hidden';
   }
   window.peptradeConfirm = function (cb) {
     var ok = false; try { ok = sessionStorage.getItem('peptrade-age') === '1'; } catch (e) {}
@@ -184,12 +229,19 @@
   function topbar() {
     if (document.querySelector('[data-topbar]')) return;
     var st = document.createElement('style');
-    st.textContent = 'body{padding-top:34px}header[data-m=header]{top:34px!important}@media (max-width:760px){body{padding-top:40px}header[data-m=header]{top:40px!important}[data-topbar]{height:40px!important;font-size:9.5px!important;letter-spacing:.04em!important;line-height:1.3;white-space:normal!important}[data-m=psticky]{padding-top:136px!important}[data-lang-toggle] button{padding:5px 7px!important}header[data-m=header]>div{margin:0 0 0 auto!important;gap:8px!important}}';
+    st.textContent = 'body{padding-top:34px}header[data-m=header]{top:34px!important}[data-m=psticky]{padding-top:130px!important}[data-tb-s]{display:none}' +
+      '@media (max-width:760px){[data-tb-l]{display:none}[data-tb-s]{display:inline}[data-topbar]{font-size:10px!important;letter-spacing:.08em!important}' +
+      '[data-m=header]{flex-wrap:nowrap!important}[data-m=nav],[data-lang-toggle],[data-cur-toggle]{display:none!important}[data-menu-btn]{display:flex!important}' +
+      '[data-cart-btn]{position:relative!important;width:44px!important;height:44px!important;padding:0!important;border-radius:999px!important;justify-content:center!important;font-size:0!important;color:transparent!important;background:#121417 url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2720%27 height=%2720%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23ece8e1%27 stroke-width=%271.5%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M3 4h2l2.4 11h10.2L20 7H6.2%27/%3E%3Ccircle cx=%279%27 cy=%2719.5%27 r=%271.3%27/%3E%3Ccircle cx=%2717%27 cy=%2719.5%27 r=%271.3%27/%3E%3C/svg%3E") center/20px no-repeat!important;border:1px solid #2c3036!important}' +
+      '[data-cart-btn]>span{position:absolute!important;top:-6px;right:-6px;background:#ece8e1!important;color:#07080a!important}' +
+      '[data-m=psticky]{padding-top:120px!important}[data-tools]{display:none!important}[data-cart-btn]{margin-left:auto!important}[data-m=header]{gap:10px!important}}' +
+      '@media (max-width:380px){[data-m=logo]{height:18px!important}[data-lang-toggle] button,[data-cur-toggle] button{padding:4px 6px!important}}';
     document.head.appendChild(st);
     var bar = document.createElement('div');
     bar.setAttribute('data-topbar', '');
     bar.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:300;height:34px;display:flex;align-items:center;justify-content:center;padding:0 12px;background:#1b2a24;color:#9fe3c4;border-bottom:1px solid #1f3a2f;font:500 11px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-align:center;white-space:nowrap;overflow:hidden";
-    bar.textContent = 'POUZE PRO VÝZKUMNÉ ÚČELY · NENÍ URČENO K LIDSKÉ SPOTŘEBĚ · PRODEJ POUZE OSOBÁM 18+';
+    var en = lang === 'en';
+    bar.innerHTML = '<span data-tb-l>' + (en ? 'FOR RESEARCH USE ONLY · NOT FOR HUMAN CONSUMPTION · ADULTS 18+ ONLY' : 'POUZE PRO VÝZKUMNÉ ÚČELY · NENÍ URČENO K LIDSKÉ SPOTŘEBĚ · PRODEJ POUZE OSOBÁM 18+') + '</span><span data-tb-s>' + (en ? 'RESEARCH ONLY · NOT FOR HUMAN USE · 18+' : 'POUZE PRO VÝZKUM · NE K LIDSKÉ SPOTŘEBĚ · 18+') + '</span>';
     document.body.appendChild(bar);
   }
   document.addEventListener('click', function (e) {

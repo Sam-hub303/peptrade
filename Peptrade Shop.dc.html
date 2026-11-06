@@ -205,7 +205,7 @@ a{color:#ece8e1;text-decoration:none}a:hover{color:#9fe3c4}
 </footer>
 
 
-<aside style="position:fixed;top:0;right:0;bottom:0;z-index:90;width:min(420px,100vw);background:#0d0e11;border-left:1px solid #1d2024;transform:translateX({{ cartX }});transition:transform .5s cubic-bezier(.7,0,.2,1);display:flex;flex-direction:column">
+<aside style="position:fixed;top:34px;right:0;bottom:0;z-index:90;width:min(420px,100vw);background:#0d0e11;border-left:1px solid #1d2024;transform:translateX({{ cartX }});transition:transform .5s cubic-bezier(.7,0,.2,1);display:flex;flex-direction:column">
   <div style="display:flex;justify-content:space-between;align-items:center;padding:24px;border-bottom:1px solid #1d2024">
     <div style="font-family:'Lexend',sans-serif;font-size:28px">Košík</div>
     <button onClick="{{ closeCart }}" style="background:transparent;border:0;color:#a9a6a0;font:13px 'IBM Plex Mono',monospace;cursor:pointer;padding:8px">ZAVŘÍT ✕</button>
@@ -351,8 +351,8 @@ class Component extends DCLogic {
       const p = this.state.p || 0; sp += (p - sp) * (1 - Math.exp(-dt * 7)); if (Math.abs(p - sp) < 1e-4) sp = p;
       if (sp === this.glLastP && !this.glDirty) return; this.glLastP = sp; this.glDirty = false;
       vial.rotation.y = sp * Math.PI * 2;
-      const portrait = cam.aspect < 0.9, dolly = ease(Math.min(1, sp / 0.9)), share = portrait ? 0.36 - dolly * 0.06 : 0.7 - dolly * 0.12;
-      const th = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)), dist = VH / (share * 2 * th), viewH = 2 * dist * th, lookY = portrait ? VH / 2 - viewH * 0.16 : VH / 2 + viewH * 0.04;
+      const portrait = cam.aspect < 0.9, dolly = ease(Math.min(1, sp / 0.9)), share = portrait ? 0.44 - dolly * 0.07 : 0.7 - dolly * 0.12;
+      const th = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)), dist = VH / (share * 2 * th), viewH = 2 * dist * th, lookY = portrait ? VH / 2 - viewH * 0.1 : VH / 2 + viewH * 0.04;
       cam.position.set(0, lookY + 0.12, dist); cam.lookAt(0, lookY, 0); renderer.render(scene, cam);
     };
     this.glRaf = requestAnimationFrame(tick);
@@ -371,7 +371,7 @@ class Component extends DCLogic {
     const goto = i => { const pe = document.getElementById('produkty'); if (!pe) return; const top = pe.getBoundingClientRect().top + window.scrollY; const range = pe.offsetHeight - window.innerHeight; window.scrollTo({ top: top + range * (i + 0.08) / n, behavior: 'smooth' }); };
     const A = PRODUCTS[idx];
     const cartItems = PRODUCTS.filter(x => cart[x.id]).map(x => ({ name: x.name, qty: cart[x.id], unit: fmt(x.price), remove: () => this.remove(x.id) }));
-    const total = PRODUCTS.reduce((t, x) => { const q = cart[x.id] || 0; return t + q * x.price * (x.id !== 'p0' && q >= 3 ? 0.85 : 1); }, 0);
+    const total = PRODUCTS.reduce((t, x) => { const q = cart[x.id] || 0; return t + q * x.price * (q >= 3 ? 0.85 : 1); }, 0);
     const names = PRODUCTS.map(x => x.name);
     const row = [...names, ...names, ...names, ...names];
     const marquee = React.createElement('div', { style: { display: 'flex', width: 'max-content', animation: 'vasek-marquee 40s linear infinite' } },

@@ -90,7 +90,7 @@ input:focus,select:focus{outline:none;border-color:#9fe3c4 !important}
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><span style="font-size:15px;color:#8a8d93">Mezisoučet</span><span style="font-size:16px">{{ it.sub }}</span></div>
               <sc-if value="{{ it.canBundle }}" hint-placeholder-val="{{ false }}">
-                <button onClick="{{ it.toBundle }}" style="align-self:flex-start;display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;background:#9fe3c40f;border:1px dashed #9fe3c4;border-radius:999px;color:#9fe3c4;font:500 11px 'Lexend',sans-serif;cursor:pointer"><span style="background:#9fe3c4;color:#07080a;border-radius:999px;padding:1px 6px;font:500 10px 'IBM Plex Mono',monospace">−15 %</span>{{ it.bundleCta }}</button>
+                <button onClick="{{ it.toBundle }}" style="align-self:flex-start;display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;background:#9fe3c40f;border:1px dashed #9fe3c4;border-radius:999px;color:#9fe3c4;font:500 11px 'Lexend',sans-serif;text-align:left;cursor:pointer"><span style="background:#9fe3c4;color:#07080a;border-radius:999px;padding:1px 6px;font:500 10px 'IBM Plex Mono',monospace;white-space:nowrap;flex:none">−15 %</span>{{ it.bundleCta }}</button>
               </sc-if>
             </div>
           </div>
@@ -117,7 +117,7 @@ input:focus,select:focus{outline:none;border-color:#9fe3c4 !important}
                 <div style="margin-top:4px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6d7076">{{ it.spec }}</div>
                 <div style="margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#9fe3c4">{{ it.note }}</div>
                 <sc-if value="{{ it.canBundle }}" hint-placeholder-val="{{ false }}">
-                  <button onClick="{{ it.toBundle }}" style="margin-top:8px;display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;background:#9fe3c40f;border:1px dashed #9fe3c4;border-radius:999px;color:#9fe3c4;font:500 11px 'Lexend',sans-serif;cursor:pointer" style-hover="background:#9fe3c41f"><span style="background:#9fe3c4;color:#07080a;border-radius:999px;padding:1px 6px;font:500 10px 'IBM Plex Mono',monospace">−15 %</span>{{ it.bundleCta }}</button>
+                  <button onClick="{{ it.toBundle }}" style="margin-top:8px;display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;background:#9fe3c40f;border:1px dashed #9fe3c4;border-radius:999px;color:#9fe3c4;font:500 11px 'Lexend',sans-serif;text-align:left;cursor:pointer" style-hover="background:#9fe3c41f"><span style="background:#9fe3c4;color:#07080a;border-radius:999px;padding:1px 6px;font:500 10px 'IBM Plex Mono',monospace;white-space:nowrap;flex:none">−15 %</span>{{ it.bundleCta }}</button>
                 </sc-if>
               </div>
               <div style="font-size:16px">{{ it.unit }}</div>
@@ -276,13 +276,13 @@ class Component extends DCLogic {
   renderVals() {
     const { cart, step, ship, coupon, discount, couponMsg, orderNo, doneTotal } = this.state;
     const ids = Object.keys(cart).filter(id => PRODUCTS[id]);
-    const line = id => PRODUCTS[id].price * cart[id] * (id !== 'p0' && cart[id] >= 3 ? 0.85 : 1);
+    const line = id => PRODUCTS[id].price * cart[id] * (cart[id] >= 3 ? 0.85 : 1);
     const items = ids.map(id => {
       const p = PRODUCTS[id], q = cart[id];
       return {
         name: p.name, spec: p.spec, qty: q, href: 'Peptrade%20Detail.dc.html?id=' + id, unit: fmt(p.price), sub: fmt(line(id)),
-        note: id === 'p0' ? '' : q >= 3 ? 'Množstevní sleva −15 % ✓' : '',
-        canBundle: id !== 'p0' && q < 3,
+        note: q >= 3 ? 'Množstevní sleva −15 % ✓' : '',
+        canBundle: q < 3,
         bundleCta: 'Přidejte ' + (3 - q) + ' ks a ušetříte ' + fmt(p.price * 3 * 0.15),
         toBundle: () => this.setQty(id, 3),
         src: (this.imgs && this.imgs[id]) || './assets/n-' + id + '.png',

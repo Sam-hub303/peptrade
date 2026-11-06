@@ -67,7 +67,7 @@ a{color:#ece8e1;text-decoration:none}a:hover{color:#9fe3c4}
       </div>
 
       <div style="border:1px solid #1d2024;border-radius:8px;background:#0b0c0e;padding:24px;display:flex;flex-direction:column;gap:20px">
-        <sc-if value="{{ isPeptide }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ true }}" hint-placeholder-val="{{ true }}">
           <div style="display:flex;flex-direction:column;gap:10px">
             <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#8a8d93;letter-spacing:.16em">MNOŽSTEVNÍ SLEVA</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -79,17 +79,16 @@ a{color:#ece8e1;text-decoration:none}a:hover{color:#9fe3c4}
         <div style="display:flex;justify-content:space-between;align-items:center;gap:16px">
           <div style="display:flex;flex-direction:column;gap:6px"><div style="font-family:'Lexend',sans-serif;font-size:40px;line-height:1">{{ priceLabel }}</div><sc-if value="{{ hasBundle }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#9fe3c4">Ušetříte {{ saveLabel }} · místo <s style="color:#6d7076">{{ fullLabel }}</s></div></sc-if></div>
           <div style="display:flex;align-items:center;border:1px solid #2c3036;border-radius:999px;overflow:hidden">
-            <button onClick="{{ dec }}" aria-label="Ubrat" style="width:40px;height:40px;background:transparent;border:0;color:#9fe3c4;font:500 18px 'IBM Plex Mono',monospace;cursor:pointer" style-hover="background:#9fe3c41a">−</button>
+            <button onClick="{{ dec }}" aria-label="Ubrat" style="flex:none;width:40px;height:40px;background:transparent;border:0;color:#9fe3c4;font:500 18px 'IBM Plex Mono',monospace;cursor:pointer" style-hover="background:#9fe3c41a">−</button>
             <span style="min-width:28px;text-align:center;font:500 14px 'IBM Plex Mono',monospace">{{ qty }}</span>
             <button onClick="{{ inc }}" aria-label="Přidat" style="width:40px;height:40px;background:transparent;border:0;color:#9fe3c4;font:500 18px 'IBM Plex Mono',monospace;cursor:pointer" style-hover="background:#9fe3c41a">+</button>
           </div>
         </div>
         <sc-if value="{{ isPeptide }}" hint-placeholder-val="{{ true }}">
-          <button onClick="{{ toggleBac }}" style="display:grid;grid-template-columns:auto 48px 1fr auto;gap:14px;align-items:center;padding:12px 16px;background:transparent;border:1px solid {{ bacBorder }};border-radius:6px;color:#ece8e1;cursor:pointer;text-align:left;font:15px 'Lexend',sans-serif">
+          <button onClick="{{ toggleBac }}" style="display:grid;grid-template-columns:auto 40px minmax(0,1fr);gap:12px;align-items:center;padding:12px 14px;background:transparent;border:1px solid {{ bacBorder }};border-radius:6px;color:#ece8e1;cursor:pointer;text-align:left;font:15px 'Lexend',sans-serif">
             <span style="width:18px;height:18px;border-radius:4px;border:1px solid #9fe3c4;display:grid;place-items:center;background:{{ bacBg }};color:#07080a;font-size:12px;line-height:1">{{ bacTick }}</span>
-            <span style="position:relative;width:48px;height:56px;border-radius:4px;background:radial-gradient(70% 60% at 50% 55%,#121a17,#0b0c0e)"><img src="{{ bacSrc }}" alt="BAC Water" style="position:absolute;inset:4px;width:40px;height:48px;object-fit:contain"></span>
-            <span style="display:flex;flex-direction:column;gap:3px"><span style="font-weight:500">Přidat BAC Water 10 ml</span><span style="font-size:13px;color:#8a8d93">K rozpuštění lyofilizátu</span></span>
-            <span style="font-size:15px;color:#a9a6a0">+ {{ bacPrice }}</span>
+            <span style="position:relative;width:40px;height:48px;border-radius:4px;background:radial-gradient(70% 60% at 50% 55%,#121a17,#0b0c0e)"><img src="{{ bacSrc }}" alt="BAC Water" style="position:absolute;inset:3px;width:34px;height:42px;object-fit:contain"></span>
+            <span style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-weight:500">Přidat BAC Water 10 ml</span><span style="font-size:13px;color:#8a8d93">K rozpuštění lyofilizátu · + {{ bacPrice }}</span></span>
           </button>
         </sc-if>
         <div style="display:flex;flex-direction:column;gap:14px;padding:18px;border:1px solid #e8c27a;border-radius:6px;background:#e8c27a12">
@@ -176,7 +175,7 @@ class Component extends DCLogic {
     const img = k => (this.imgs && this.imgs[k]) || './assets/n-' + k + '.png';
     const { qty, cart, added, bac, agreed } = this.state;
     const isPeptide = id !== 'p0';
-    const rate = isPeptide && qty >= 3 ? 0.85 : 1;
+    const rate = qty >= 3 ? 0.85 : 1;
     const full = x.price * qty, total = Math.round(full * rate * 100) / 100;
     const specs = (x.specs || [['Obsah', x.size], ...PEP]).map(([k, v]) => ({ k, v }));
     const others = ORDER.filter(k => k !== id);
